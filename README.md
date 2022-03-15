@@ -70,7 +70,7 @@ getAddress.autocomplete(
             postcode:'postcode',  /* The id of the element bound to 'postcode' */
             residential:'residential'  /* The id of the element bound to 'residential' */
           },
-          id_prefix:'getAddress-autocomplete' ,  /* The id of the textbox and list container */
+          id_prefix:'getAddress-autocomplete-native' ,  /* The id of the textbox and list container */
           delay:200, /* millisecond delay between keypress and API call */
           minimum_characters:2,  /* minimum characters to initiate an API call */
           select_on_focus:true,  /* if true, highlights textbox characters on focus*/
