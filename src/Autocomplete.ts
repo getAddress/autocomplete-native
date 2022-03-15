@@ -56,9 +56,6 @@ export default class Autocomplete
     };
 
     
-
-   
-
     public build()
     {
 
@@ -190,6 +187,8 @@ export default class Autocomplete
             }
             else
             {
+                this.input.value = '';
+                
                 if(this.attributeValues.options.clear_list_on_select){
                     this.clearList();
                 }

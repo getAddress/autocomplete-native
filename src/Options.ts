@@ -3,7 +3,7 @@ import { IOutputFields } from "./OutputFields";
 
 export class Options 
 {
-    id_prefix?:string = "getAddress-autocomplete";
+    id_prefix?:string = "getAddress-autocomplete-native";
     output_fields:IOutputFields = undefined;
     delay:number = 200;
     minimum_characters:number = 2; 
