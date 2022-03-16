@@ -9,11 +9,8 @@ export default class Autocomplete
 
     private filterTimer: ReturnType<typeof setTimeout>
     private blurTimer: ReturnType<typeof setTimeout>
-    
     private list: HTMLDataListElement;
-    private selectedIndex = -1;
-    
- 
+   
 
     constructor(readonly input:HTMLInputElement,readonly client:Client,
         readonly output_fields:OutputFields, readonly attributeValues:AttributeValues)
@@ -36,19 +33,17 @@ export default class Autocomplete
     private destroyInput(){
 
         this.input.removeAttribute('list');
-
         this.input.removeEventListener('focus',this.onInputFocus);
         this.input.removeEventListener('paste',this.onInputPaste); 
-
         this.input.removeEventListener('keydown', this.onKeyDown);
-        this.input.removeEventListener('keyup', this.onKeyUp);
+        this.input.removeEventListener('keyup', this.onKeyUp); 
+        this.input.removeEventListener('input', this.onInput); 
     }
 
     private onInputFocus =  () => {
         if(this.attributeValues.options.select_on_focus){
             this.input.select();
         }
-        this.selectedIndex = -1;
     };
 
     private onInputPaste = () => {
@@ -60,29 +55,44 @@ export default class Autocomplete
     {
 
         this.input.setAttribute('list', `${this.attributeValues.listId}`);
-        
         this.input.addEventListener('focus', this.onInputFocus);
         this.input.addEventListener('paste', this.onInputPaste);
-
         this.input.addEventListener('keydown', this.onKeyDown);
         this.input.addEventListener('keyup', this.onKeyUp);
+        this.input.addEventListener('input', this.onInput);
 
         this.list = document.createElement('DATALIST') as HTMLDataListElement;
         this.list.id = this.attributeValues.listId;
         
         this.input.insertAdjacentElement("afterend",this.list);
+    }
 
+    private onInput =(e:Event) => {
+        if((e instanceof InputEvent == false) && e.target instanceof HTMLInputElement)
+        {
+            const input = e.target as HTMLInputElement;
+            
+            Array.from(this.list.querySelectorAll("option"))
+            .every(
+                (o:HTMLOptionElement) => {
+                    if(o.innerText === input.value){
+                        this.handleSuggestionSelected(o);
+                        return false;
+                    }
+                    return true;
+                });
+        }
     }
 
     private onKeyUp = (event:KeyboardEvent) => {
         this.debug(event);
         this.handleKeyUp(event);
-    };
+    };  
 
     private onKeyDown = (event:KeyboardEvent) => {
         this.debug(event);
-        this.keyDownHandler(event);
-    };
+        this.handleKeyDownDefault(event);
+    }; 
 
     private debug = (data:any)=>{
         if(this.attributeValues.options.debug){
@@ -90,58 +100,7 @@ export default class Autocomplete
         }
     };
 
-    keyDownHandler = (event: KeyboardEvent)=>{
-        switch (event.code) {
-             case "ArrowUp":
-                this.handleUpKey(event);
-                break;
-            case "ArrowDown":
-                this.handleDownKey(event);
-                break;
-            case "End":
-                this.handleEndKey(event);
-                break;
-            case "Home":
-                this.handleHomeKey(event);
-                break;
-            case "Enter":
-                this.handleEnterKey(event);
-                break;
-            case "PageUp":
-                this.handlePageUpKey(event);
-                break;
-            case "PageDown":
-                this.handlePageDownKey(event);
-                break;
-            case "Escape":
-                this.handleComponentBlur(true);
-                break;
-            default:
-                this.handleKeyDownDefault(event);
-                break; 
-        }
-    };
-
-    handlePageUpKey = (event: KeyboardEvent) => {
-        if (this.list.children.length>0) {
-            event.preventDefault();
-            this.setSuggestionFocus(event, 0);
-        }
-    }
-    handlePageDownKey = (event: KeyboardEvent) => {
-        if (this.list.children.length>0) {
-            event.preventDefault();
-            this.setSuggestionFocus(event, this.list.children.length -1);
-        }
-    }
-
-    handleHomeKey = (event: KeyboardEvent) => {
-        if (!this.list.hidden && event.target !== this.input) {
-            event.preventDefault();
-            this.setSuggestionFocus(event, 0);
-        }
-    }
-
+   
     handleComponentBlur = (force: boolean = false) =>{
         
         clearTimeout(this.blurTimer);
@@ -154,66 +113,39 @@ export default class Autocomplete
     }
 
 
-    handleEndKey = (event: KeyboardEvent) => {
-        if (this.list.children.length>0) {
-            const suggestions = this.list.children;
-            if (suggestions.length) {
-                event.preventDefault();
-                this.setSuggestionFocus(event, suggestions.length - 1);
-            }
+
+    handleSuggestionSelected = async (suggestion:HTMLOptionElement)=>{
+
+        if(!this.attributeValues.options.enable_get){
+            this.clearList();
         }
-    }
-
-    handleEnterKey = (event: KeyboardEvent) =>{
-        if (this.list.children.length>0) {
-            event.preventDefault();
-            if (this.selectedIndex > -1) {
-                this.handleSuggestionSelected(event, this.selectedIndex);
-            }
-        }
-    }
-
-    handleSuggestionSelected = async (event: Event,  indexNumber:number)=>{
-        
-        this.setSuggestionFocus(event,indexNumber);
-
-        if(this.selectedIndex > -1)
+        else
         {
-            const suggestions = this.list.children;
-            const suggestion = suggestions[this.selectedIndex] as HTMLElement;
-            
-            if(!this.attributeValues.options.enable_get){
+            this.input.value = '';
+
+            if(this.attributeValues.options.clear_list_on_select){
                 this.clearList();
             }
-            else
-            {
-                this.input.value = '';
-                
-                if(this.attributeValues.options.clear_list_on_select){
-                    this.clearList();
-                }
 
-                const id = suggestion.dataset.id;
-                const addressResult = await this.client.get(id);
-                if(addressResult.isSuccess){
-                    let success = addressResult.toSuccess();
-                    
-                    this.bind(success.address);
-                    AddressSelectedEvent.dispatch(this.input,id,success.address);
-                    
-                    if(this.attributeValues.options.input_focus_on_select){
-                        this.input.focus();
-                        this.input.setSelectionRange(this.input.value.length,this.input.value.length+1);
-                    }
-                }
-                else{
-                    const failed = addressResult.toFailed();
-                    AddressSelectedFailedEvent.dispatch(this.input,id,failed.status,failed.message);
+            const id = suggestion.dataset.id;
+            const addressResult = await this.client.get(id);
+            if(addressResult.isSuccess){
+                let success = addressResult.toSuccess();
+                
+                this.bind(success.address);
+                AddressSelectedEvent.dispatch(this.input,id,success.address);
+                
+                if(this.attributeValues.options.input_focus_on_select){
+                    this.input.focus();
+                    this.input.setSelectionRange(this.input.value.length,this.input.value.length+1);
                 }
             }
-            
+            else{
+                const failed = addressResult.toFailed();
+                AddressSelectedFailedEvent.dispatch(this.input,id,failed.status,failed.message);
+            }
         }
-        
+            
     };
 
     private bind = (address:AutocompleteAddress)=>
@@ -295,11 +227,10 @@ export default class Autocomplete
                 }
             },this.attributeValues.options.delay);
         }
-        else if(!event.key){
-            this.handleSuggestionSelected(event, this.selectedIndex);
-        }
-
+       
     };
+
+    
 
     handleKeyUp = (event: KeyboardEvent)=>{
         if(event.code === 'Backspace' || event.code === 'Delete')
@@ -321,51 +252,6 @@ export default class Autocomplete
         }
     };
 
-
-    handleUpKey(event: KeyboardEvent) {
-        event.preventDefault();
-       
-        this.setSuggestionFocus(event, this.selectedIndex - 1);
-    }
-
-    handleDownKey = (event: KeyboardEvent) => {
-        event.preventDefault();
-
-        if (this.selectedIndex < 0) {
-            this.setSuggestionFocus(event, 0);
-        } 
-        else {
-            this.setSuggestionFocus(event, this.selectedIndex + 1);
-        }
-    }
-
-    setSuggestionFocus = (event:Event, index:number) => {
-       
-        const suggestions = this.list.children;
-       
-        if (index < 0 || !suggestions.length) {
-            this.selectedIndex = -1;
-            if (event && (event as Event).target !== this.input) {
-                this.input.focus();
-            }
-            return;
-        }
-
-        if (index >= suggestions.length) {
-            this.selectedIndex = suggestions.length - 1;
-            this.setSuggestionFocus(event, this.selectedIndex);
-            return;
-        }
-
-        const focusedSuggestion = suggestions[index] as HTMLElement;
-        if (focusedSuggestion) {
-            this.selectedIndex = index;
-            focusedSuggestion.focus();
-            return;
-        }
-
-        this.selectedIndex = -1;
-    }
 
 
     populateList = async ()=>{
@@ -396,12 +282,7 @@ export default class Autocomplete
                     }
 
                     this.list.replaceChildren(...newItems);
-                    
-                    const toFocus = this.list.children[0] as HTMLElement;
-                   
-                    if (toFocus) {
-                        this.selectedIndex = 0;
-                    }
+
                 }
                 else
                 {
@@ -419,8 +300,6 @@ export default class Autocomplete
     
     clearList = ()=>{
         this.list.replaceChildren(...[]);
-        
-        this.selectedIndex = -1;
     };
 
     getListItem = (suggestion:Suggestion)=>
