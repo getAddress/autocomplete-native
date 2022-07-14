@@ -1,6 +1,6 @@
 {
   "name": "getaddress-autocomplete-native",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "GetAddress.io - Native Autocomplete Plug-In",
   "main": "./dist/getaddress-autocomplete-native.mjs",
   "type": "module",
@@ -26,9 +26,9 @@
     "rollup": "^2.64.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-ts": "^2.0.5",
-    "typescript": "^4.5.4"
+    "typescript": "4.5.4"
   },
   "dependencies": {
-    "getaddress-api": "^1.1.13"
+    "getaddress-api": "^1.2.4"
   }
 }

@@ -260,7 +260,8 @@ export default class Autocomplete
             autocompleteOptions.all = true;
             autocompleteOptions.top = this.attributeValues.options.suggestion_count;
             autocompleteOptions.template = "{formatted_address}{postcode,, }{postcode}";
-           
+            autocompleteOptions.fuzzy =false;
+            
             if(this.attributeValues.options.filter){
                 autocompleteOptions.filter = this.attributeValues.options.filter;
             }
