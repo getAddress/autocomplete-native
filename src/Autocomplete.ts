@@ -256,11 +256,11 @@ export default class Autocomplete
 
     populateList = async ()=>{
             
-        const autocompleteOptions = new AutocompleteOptions();
-            autocompleteOptions.all = true;
-            autocompleteOptions.top = this.attributeValues.options.suggestion_count;
-            autocompleteOptions.template = "{formatted_address}{postcode,, }{postcode}";
-            autocompleteOptions.fuzzy =false;
+            const autocompleteOptions:Partial<AutocompleteOptions> = {
+                all : true,
+                top : this.attributeValues.options.suggestion_count,
+                template : "{formatted_address}{postcode,, }{postcode}"
+            };
             
             if(this.attributeValues.options.filter){
                 autocompleteOptions.filter = this.attributeValues.options.filter;
