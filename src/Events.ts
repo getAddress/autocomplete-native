@@ -4,7 +4,7 @@ export class AddressSelectedEvent
 {
     static dispatch(element:HTMLElement|Document,id:string,address:AutocompleteAddress){
         
-        const evt  = new Event("getaddress-autocomplete-address-selected",{bubbles:true});
+        const evt  = new Event("getaddress-autocomplete-address-selected",{bubbles:true}) as any;
         evt["address"] = address;
         evt["id"] = id;
         element.dispatchEvent(evt);
@@ -15,7 +15,7 @@ export class AddressSelectedFailedEvent
 {
     static dispatch(element:HTMLElement|Document,id:string, status:number, message:string){
         
-        const evt  = new Event("getaddress-autocomplete-address-selected-failed",{bubbles:true});
+        const evt  = new Event("getaddress-autocomplete-address-selected-failed",{bubbles:true}) as any;
         evt["status"] = status;
         evt["message"] = message;
         evt["id"] = id;
@@ -28,7 +28,7 @@ export class SuggestionsEvent
 {
     static dispatch(element:HTMLElement|Document,query:string,suggestions:Suggestion[]){
         
-        const evt  = new Event("getaddress-autocomplete-suggestions",{bubbles:true});
+        const evt  = new Event("getaddress-autocomplete-suggestions",{bubbles:true}) as any;
         evt["suggestions"] = suggestions;
         evt["query"] = query;
         element.dispatchEvent(evt);
@@ -39,7 +39,7 @@ export class SuggestionsFailedEvent
 {
     static dispatch(element:HTMLElement|Document, query:string,status:number, message:string){
         
-        const evt  = new Event("getaddress-autocomplete-suggestions-failed",{bubbles:true});
+        const evt  = new Event("getaddress-autocomplete-suggestions-failed",{bubbles:true}) as any;
         evt["status"] = status;
         evt["message"] = message;
         evt["query"] = query;

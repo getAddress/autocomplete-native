@@ -3,7 +3,7 @@ import { Options } from "./Options";
 export default class AttributeValues{
     
     readonly listId:string;
-    readonly id_prefix:string;
+    readonly id_prefix?:string;
    
 
     constructor(readonly options:Options, index:number)

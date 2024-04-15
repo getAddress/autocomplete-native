@@ -7,9 +7,9 @@ import { AddressSelectedEvent, AddressSelectedFailedEvent, SuggestionsEvent, Sug
 export default class Autocomplete
 {
 
-    private filterTimer: ReturnType<typeof setTimeout>
-    private blurTimer: ReturnType<typeof setTimeout>
-    private list: HTMLDataListElement;
+    private filterTimer?: ReturnType<typeof setTimeout>
+    private blurTimer?: ReturnType<typeof setTimeout>
+    private list?: HTMLDataListElement;
    
 
     constructor(readonly input:HTMLInputElement,readonly client:Client,
@@ -25,7 +25,10 @@ export default class Autocomplete
 
     private destroyList()
     {
-        this.list.remove();
+        if(this.list)
+        {
+            this.list.remove();
+        }
     }
 
     
@@ -68,7 +71,7 @@ export default class Autocomplete
     }
 
     private onInput =(e:Event) => {
-        if((e instanceof InputEvent == false) && e.target instanceof HTMLInputElement)
+        if(this.list && (e instanceof InputEvent == false) && e.target instanceof HTMLInputElement)
         {
             const input = e.target as HTMLInputElement;
             
@@ -128,21 +131,24 @@ export default class Autocomplete
             }
 
             const id = suggestion.dataset.id;
-            const addressResult = await this.client.get(id);
-            if(addressResult.isSuccess){
-                let success = addressResult.toSuccess();
-                
-                this.bind(success.address);
-                AddressSelectedEvent.dispatch(this.input,id,success.address);
-                
-                if(this.attributeValues.options.input_focus_on_select){
-                    this.input.focus();
-                    this.input.setSelectionRange(this.input.value.length,this.input.value.length+1);
+            if(id)
+            {
+                const addressResult = await this.client.get(id);
+                if(addressResult.isSuccess){
+                    let success = addressResult.toSuccess();
+                    
+                    this.bind(success.address);
+                    AddressSelectedEvent.dispatch(this.input,id,success.address);
+                    
+                    if(this.attributeValues.options.input_focus_on_select){
+                        this.input.focus();
+                        this.input.setSelectionRange(this.input.value.length,this.input.value.length+1);
+                    }
                 }
-            }
-            else{
-                const failed = addressResult.toFailed();
-                AddressSelectedFailedEvent.dispatch(this.input,id,failed.status,failed.message);
+                else{
+                    const failed = addressResult.toFailed();
+                    AddressSelectedFailedEvent.dispatch(this.input,id,failed.status,failed.message);
+                }
             }
         }
             
@@ -186,7 +192,7 @@ export default class Autocomplete
         }
     };
 
-    private setOutputfield = (fieldName:string, fieldValue:string) =>
+    private setOutputfield = (fieldName:string|undefined, fieldValue:string) =>
     {
             if(!fieldName){
                 return;
@@ -273,7 +279,7 @@ export default class Autocomplete
                 const success = result.toSuccess();
                 const newItems:Node[] = [];
 
-                if(success.suggestions.length)
+                if(this.list && success.suggestions.length)
                 {
                   
                     for(let i = 0; i< success.suggestions.length; i++){
@@ -300,7 +306,9 @@ export default class Autocomplete
 
     
     clearList = ()=>{
-        this.list.replaceChildren(...[]);
+        if(this.list){
+            this.list.replaceChildren(...[]);
+        }
     };
 
     getListItem = (suggestion:Suggestion)=>
