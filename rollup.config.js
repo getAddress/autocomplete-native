@@ -27,7 +27,7 @@ export default [
         ,plugins:[nodeResolve()]
     },
     {
-        input: "dist/getaddress-autocomplete-native-" + pkg.version + ".js",
+        input: "dist/getaddress-autocomplete-native-" + pkg.version + ".mjs",
         output: 
             {
                 file:"dist/getaddress-autocomplete-native-" + pkg.version + ".min.js",
