@@ -1,6 +1,6 @@
 {
   "name": "getaddress-autocomplete-native",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "GetAddress.io - Native Autocomplete Plug-In",
   "main": "./lib/Index",
   "type": "module",
@@ -18,10 +18,20 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "cleanDist": "rimraf dist/*",
     "rollup": "rollup -c",
-    "compile":"tsc -p .",
-    "build": "npm-run-all cleanDist compile rollup"
+    "compile": "tsc -p .",
+    "build": "npm-run-all cleanDist compile rollup",
+    "watchRollup": "rollup -c --watch",
+    "watchTs": "tsc -p . --watch"
   },
-  "keywords": ["postcode","getAddress","address","plugin","UK","autocomplete","datalist"],
+  "keywords": [
+    "postcode",
+    "getAddress",
+    "address",
+    "plugin",
+    "UK",
+    "autocomplete",
+    "datalist"
+  ],
   "author": "getAddress()",
   "license": "MIT",
   "devDependencies": {
@@ -33,6 +43,7 @@
     "typescript": "^5.4.3"
   },
   "dependencies": {
-    "getaddress-api": "^1.4.3"
+    "getaddress-api": "^1.4.3",
+    "getaddress-autocomplete-modal": "^1.0.12"
   }
 }

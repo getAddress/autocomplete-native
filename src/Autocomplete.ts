@@ -1,6 +1,5 @@
 import AttributeValues from "./AttributeValues";
-import Client, { AutocompleteAddress, AutocompleteOptions, Suggestion } from 'getaddress-api';
-import { OutputFields } from "./OutputFields";
+import Client, {  AutocompleteOptions, Suggestion } from 'getaddress-api';
 import { AddressSelectedEvent, AddressSelectedFailedEvent, SuggestionsEvent, SuggestionsFailedEvent } from "./Events";
 
 
@@ -12,8 +11,7 @@ export default class Autocomplete
     private list?: HTMLDataListElement;
    
 
-    constructor(readonly input:HTMLInputElement,readonly client:Client,
-        readonly output_fields:OutputFields, readonly attributeValues:AttributeValues)
+    constructor(readonly input:HTMLInputElement,readonly client:Client,readonly attributeValues:AttributeValues)
     {
         
     }
@@ -137,7 +135,6 @@ export default class Autocomplete
                 if(addressResult.isSuccess){
                     let success = addressResult.toSuccess();
                     
-                    this.bind(success.address);
                     AddressSelectedEvent.dispatch(this.input,id,success.address);
                     
                     if(this.attributeValues.options.input_focus_on_select){
@@ -154,67 +151,7 @@ export default class Autocomplete
             
     };
 
-    private bind = (address:AutocompleteAddress)=>
-    {
-        if(address && this.attributeValues.options.bind_output_fields)
-        {
-            this.setOutputfield(this.output_fields.building_name,address.building_name);
-            this.setOutputfield(this.output_fields.building_number,address.building_number);
-
-            this.setOutputfield(this.output_fields.latitude,address.latitude.toString());
-            this.setOutputfield(this.output_fields.longitude,address.longitude.toString());
-
-            this.setOutputfield(this.output_fields.line_1,address.line_1);
-            this.setOutputfield(this.output_fields.line_2,address.line_2);
-            this.setOutputfield(this.output_fields.line_3,address.line_3);
-            this.setOutputfield(this.output_fields.line_4,address.line_4);
-
-            this.setOutputfield(this.output_fields.country,address.country);
-            this.setOutputfield(this.output_fields.county,address.county);
-
-            this.setOutputfield(this.output_fields.formatted_address_0,address.formatted_address[0]);
-            this.setOutputfield(this.output_fields.formatted_address_1,address.formatted_address[1]);
-            this.setOutputfield(this.output_fields.formatted_address_2,address.formatted_address[2]);
-            this.setOutputfield(this.output_fields.formatted_address_3,address.formatted_address[3]);
-            this.setOutputfield(this.output_fields.formatted_address_4,address.formatted_address[4]);
-
-            this.setOutputfield(this.output_fields.town_or_city,address.town_or_city);
-            this.setOutputfield(this.output_fields.locality,address.locality);
-            this.setOutputfield(this.output_fields.district,address.district);
-            this.setOutputfield(this.output_fields.residential,address.residential.toString());
-
-            this.setOutputfield(this.output_fields.sub_building_name,address.sub_building_name);
-            this.setOutputfield(this.output_fields.sub_building_number,address.sub_building_number);
-
-            this.setOutputfield(this.output_fields.thoroughfare,address.thoroughfare);
-            this.setOutputfield(this.output_fields.postcode,address.postcode);
-            
-        }
-    };
-
-    private setOutputfield = (fieldName:string|undefined, fieldValue:string) =>
-    {
-            if(!fieldName){
-                return;
-            }
-
-            let element = document.getElementById(fieldName) as HTMLElement;
-            
-            if(!element){
-                element = document.querySelector(fieldName) as HTMLElement;
-            }
-
-            if(element)
-            {
-               if(element instanceof HTMLInputElement){
-                element.value = fieldValue;
-               }
-               else{
-                element.innerText = fieldValue;
-               }
-            }
-            return element;
-    }
+  
 
     handleKeyDownDefault = (event: KeyboardEvent)=>{
         
@@ -239,21 +176,27 @@ export default class Autocomplete
     
 
     handleKeyUp = (event: KeyboardEvent)=>{
-        if(event.code === 'Backspace' || event.code === 'Delete')
-        {
-            if(event){
-                const target =(event as Event).target
-                if (target == this.input)
-                {
-                    if(this.input.value.length < this.attributeValues.options.minimum_characters)
+        if(event){
+            if(event.code === 'Backspace' || event.code === 'Delete')
+            {
+
+                    const target =(event as Event).target
+                    if (target == this.input)
                     {
-                        this.clearList(); 
-                    }
-                    else 
-                    {
-                        this.populateList();
-                    }
-                } 
+                        clearTimeout(this.filterTimer);
+                        this.filterTimer = setTimeout(() => 
+                        {
+                            if(this.input.value.length < this.attributeValues.options.minimum_characters)
+                            {
+                                this.clearList(); 
+                            }
+                            else 
+                            {
+                                this.populateList();
+                            }
+                        },this.attributeValues.options.delay);
+                    } 
+                
             }
         }
     };

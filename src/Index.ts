@@ -1,8 +1,9 @@
 import Autocomplete from "./Autocomplete";
 import { Options } from "./Options";
 import Client from 'getaddress-api';
-import { OutputFields } from "./OutputFields";
 import AttributeValues from "./AttributeValues";
+import { modal, isTouchEnabled,screenWidth, Options as FSoptions } from "getaddress-autocomplete-modal";
+import { AddressSelectedEvent, SuggestionsEvent,AddressSelectedFailedEvent,SuggestionsFailedEvent  } from "./Events";
 
 class InstanceCounter
 {
@@ -27,54 +28,64 @@ function autocomplete(id:string,api_key:string, options?: Partial<Options>)
     if(!textbox){
         textbox = document.querySelector(id) as HTMLInputElement;
     }
+    
     if(!textbox){
         return;
     }
     
     const client = new Client(api_key, allOptions.alt_autocomplete_url,allOptions.alt_get_url);
-    
-    const outputFields = new OutputFields(allOptions.output_fields);
-
-    if(allOptions.set_default_output_field_names)
-    {
-        outputFields.formatted_address_0= outputFields.formatted_address_0??"";
-        outputFields.formatted_address_1=outputFields.formatted_address_1??"formatted_address_1";
-        outputFields.formatted_address_2=outputFields.formatted_address_2??"formatted_address_2";
-        outputFields.formatted_address_3=outputFields.formatted_address_3??"formatted_address_3";
-        outputFields.formatted_address_4=outputFields.formatted_address_4??"formatted_address_4";
-        outputFields.line_1= outputFields.line_1??"line_1";
-        outputFields.line_2=  outputFields.line_2??"line_2";
-        outputFields.line_3= outputFields.line_3??"line_3";
-        outputFields.line_4 =  outputFields.line_4??"line_4";
-        outputFields.town_or_city=   outputFields.town_or_city??"town_or_city";
-        outputFields.county=  outputFields.county??"county";
-        outputFields.country= outputFields.country??"country";
-        outputFields.postcode=  outputFields.postcode??"postcode";
-        outputFields.latitude= outputFields.latitude??"latitude";
-        outputFields.longitude= outputFields.longitude??"longitude";
-        outputFields.building_number=   outputFields.building_number??"building_number";
-        outputFields.building_name= outputFields.building_name??"building_name";
-        outputFields.sub_building_number= outputFields.sub_building_number??"sub_building_number";
-        outputFields.sub_building_name=   outputFields.sub_building_name??"sub_building_name";
-        outputFields.thoroughfare= outputFields.thoroughfare??'thoroughfare'; 
-        outputFields.locality = outputFields.locality??"locality";
-        outputFields.district = outputFields.district ?? "district";
-        outputFields.residential = outputFields.residential ??"residential";
-    }
-
-    if(!outputFields.formatted_address_0){
-        outputFields.formatted_address_0 = id;
-    }
 
     const index = InstanceCounter.instances.length;
 
     const attributeValues = new AttributeValues(allOptions,index);
     
-    const autocomplete = new Autocomplete(textbox,client,outputFields,attributeValues);
-    autocomplete.build();
-    
+    if(allOptions.full_screen_on_mobile && screenWidth() <= allOptions.max_mobile_screen_width && isTouchEnabled())
+    {
+        var fsOptions=  new FSoptions(allOptions.full_screen_options);
 
+        fsOptions.max_screen_width = allOptions.max_mobile_screen_width;
+        fsOptions.debug = allOptions.debug;
+        fsOptions.alt_autocomplete_url = allOptions.alt_autocomplete_url;
+        fsOptions.alt_get_url = allOptions.alt_get_url;
+        fsOptions.suggestion_count = allOptions.suggestion_count;
+
+        if(!fsOptions.filter)
+        {
+            fsOptions.filter = allOptions.filter;
+        }
+        if(!fsOptions.placeholder)
+        {
+            fsOptions.placeholder = textbox.placeholder;
+        }
+
+        const modalInstance = modal(id,api_key, fsOptions);
+        if(modalInstance)
+        {
+            modalInstance.addEventListener("getaddress-autocomplete-modal-suggestions", function(e:any){
+                SuggestionsEvent.dispatch(textbox,e.data,e.suggestions);
+            });
+        
+            modalInstance.addEventListener("getaddress-autocomplete-modal-selected", function(e:any){
+                AddressSelectedEvent.dispatch(textbox,e.id,e.address);
+            });
+
+            modalInstance.addEventListener("getaddress-autocomplete-modal-selected-failed", function(e:any){
+                AddressSelectedFailedEvent.dispatch(textbox,e.id,e.status,e.message);
+            });
+
+             modalInstance.addEventListener("getaddress-autocomplete-modal-suggestions-failed", function(e:any){
+                SuggestionsFailedEvent.dispatch(textbox,e.id,e.status,e.message);
+            });
+
+            return textbox;
+        }
+    }
+    
+    const autocomplete = new Autocomplete(textbox,client,attributeValues);
+    autocomplete.build();
     InstanceCounter.add(autocomplete);
+    
+    return textbox;
 }
 
 function destroy()
