@@ -20,7 +20,7 @@ npm install getaddress-autocomplete-native
   <label>Address Line 2</label>
   <div><input id="line2" type="text"></div>
 
-   <label>Address Line 3</label>
+  <label>Address Line 3</label>
   <div><input id="line3" type="text"></div>
 
    <label>Address Line 4</label>
