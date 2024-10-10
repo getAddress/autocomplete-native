@@ -8,7 +8,7 @@ npm install getaddress-autocomplete-native
 ```
 ### Or CDN
 ```
-<script src="https://cdn.getaddress.io/scripts/getaddress-autocomplete-native-2.0.0.min.js"></script>
+<script src="https://cdn.getaddress.io/scripts/getaddress-autocomplete-native-2.0.1.min.js"></script>
 ```
 
 ## Usage
@@ -20,10 +20,10 @@ npm install getaddress-autocomplete-native
   <label>Address Line 2</label>
   <div><input id="line2" type="text"></div>
 
-   <label>Address Line 3</label>
+  <label>Address Line 3</label>
   <div><input id="line3" type="text"></div>
 
-   <label>Address Line 4</label>
+  <label>Address Line 4</label>
   <div><input id="line4" type="text"></div>
 
   <label>Address Line 5</label>
@@ -62,9 +62,9 @@ getAddress.autocomplete(
           filter:undefined, /* the suggestion filter (see Autocomplete API)*/
           input_focus_on_select:true,  /* if true, sets the focus to the textbox after selecting an address*/
           debug:false, /* if true, logs behavior */
-          enable_get:true /* if true, retreives address on select */,
-          full_screen_on_mobile:true /* if true, opens full screen on mobile devices*/;
-          max_mobile_screen_width:500 /* max mobile screen width*/;
+          enable_get:true, /* if true, retreives address on select */,
+          full_screen_on_mobile:true, /* if true, opens full screen on mobile devices*/;
+          max_mobile_screen_width:500, /* max mobile screen width*/;
           full_screen_options:undefined /* full screen display options*/
         }
     );
