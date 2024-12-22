@@ -65,7 +65,8 @@ getAddress.autocomplete(
           enable_get:true, /* if true, retreives address on select */,
           full_screen_on_mobile:true, /* if true, opens full screen on mobile devices*/;
           max_mobile_screen_width:500, /* max mobile screen width*/;
-          full_screen_options:undefined /* full screen display options*/
+          full_screen_options:undefined, /* full screen display options*/
+          show_postcode:false /* always display postcode in suggestions*/
         }
     );
 ```

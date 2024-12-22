@@ -208,7 +208,8 @@ export default class Autocomplete
             const autocompleteOptions:Partial<AutocompleteOptions> = {
                 all : true,
                 top : this.attributeValues.options.suggestion_count,
-                template : "{formatted_address}{postcode,, }{postcode}"
+                template : "{formatted_address}{postcode,, }{postcode}",
+                show_postcode: this.attributeValues.options.show_postcode
             };
             
             if(this.attributeValues.options.filter){

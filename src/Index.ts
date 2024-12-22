@@ -48,6 +48,7 @@ function autocomplete(id:string,api_key:string, options?: Partial<Options>)
         fsOptions.alt_autocomplete_url = allOptions.alt_autocomplete_url;
         fsOptions.alt_get_url = allOptions.alt_get_url;
         fsOptions.suggestion_count = allOptions.suggestion_count;
+        fsOptions.show_postcode = allOptions.show_postcode;
 
         if(!fsOptions.filter)
         {

@@ -1,6 +1,6 @@
 {
   "name": "getaddress-autocomplete-native",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "GetAddress.io - Native Autocomplete Plug-In",
   "main": "./lib/Index",
   "type": "module",
@@ -43,7 +43,7 @@
     "typescript": "^5.4.3"
   },
   "dependencies": {
-    "getaddress-api": "^1.4.3",
-    "getaddress-autocomplete-modal": "^1.0.15"
+    "getaddress-api": "^2.1.0",
+    "getaddress-autocomplete-modal": "^1.1.1"
   }
 }
