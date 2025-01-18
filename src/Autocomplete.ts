@@ -76,7 +76,7 @@ export default class Autocomplete
             Array.from(this.list.querySelectorAll("option"))
             .every(
                 (o:HTMLOptionElement) => {
-                    if(o.innerText === input.value){
+                    if(o.value === input.value){
                         this.handleSuggestionSelected(o);
                         return false;
                     }
@@ -156,6 +156,9 @@ export default class Autocomplete
     handleKeyDownDefault = (event: KeyboardEvent)=>{
         
         let isPrintableKey = event.key && (event.key.length === 1 || event.key === 'Unidentified');
+
+        let delay = event.key === ' '?0:this.attributeValues.options.delay;
+
         if(isPrintableKey)
         {
             clearTimeout(this.filterTimer);
@@ -168,18 +171,18 @@ export default class Autocomplete
                 else{
                     this.clearList(); 
                 }
-            },this.attributeValues.options.delay);
+            },delay);
         }
        
     };
 
+ 
     
 
     handleKeyUp = (event: KeyboardEvent)=>{
         if(event){
             if(event.code === 'Backspace' || event.code === 'Delete')
             {
-
                     const target =(event as Event).target
                     if (target == this.input)
                     {
@@ -208,7 +211,7 @@ export default class Autocomplete
             const autocompleteOptions:Partial<AutocompleteOptions> = {
                 all : true,
                 top : this.attributeValues.options.suggestion_count,
-                template : "{formatted_address}{postcode,, }{postcode}",
+                template : `<option value="{formatted_address_0}">{formatted_address_1}{formatted_address_1,, }{formatted_address_2}{formatted_address_2,, }{formatted_address_3}{formatted_address_4,, }{formatted_address_4}{postcode,, }{postcode}</option>`,
                 show_postcode: this.attributeValues.options.show_postcode
             };
             
@@ -228,7 +231,7 @@ export default class Autocomplete
                   
                     for(let i = 0; i< success.suggestions.length; i++){
                         
-                        const li = this.getListItem(success.suggestions[i]);
+                        const li = this.getListItem(success.suggestions[i],i);
                         newItems.push(li);
                     }
 
@@ -255,18 +258,37 @@ export default class Autocomplete
         }
     };
 
-    getListItem = (suggestion:Suggestion)=>
+    getListItem = (suggestion:Suggestion, index:number)=>
     {
-        const option = document.createElement('OPTION') as HTMLOptionElement;
-
-        let address = suggestion.address;
-
-        option.innerText = address;
+        let option= this.htmlToNode(suggestion.address) as HTMLOptionElement;
+        
         option.dataset.id =suggestion.id;
+        
+        for(let i = 0; i< index; i++)
+        {
+            option.value = option.value + ' ';
+        }
         
         return option;
     };
 
+    private htmlToNode =(html:string)=> {
+    const template = document.createElement('template') as HTMLTemplateElement;
+    template.innerHTML = html;
+   
+
+    if(html){
+        html = html.trim();
+    }
+
+    const nNodes = template.content.childNodes.length;
+    if (nNodes !== 1) {
+        throw new Error(
+            'html parameter must represent a single node'
+        );
+    }
+    return template.content.firstChild;
+}
     
 
 

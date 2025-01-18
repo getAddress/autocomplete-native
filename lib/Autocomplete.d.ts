@@ -24,5 +24,6 @@ export default class Autocomplete {
     handleKeyUp: (event: KeyboardEvent) => void;
     populateList: () => Promise<void>;
     clearList: () => void;
-    getListItem: (suggestion: Suggestion) => HTMLOptionElement;
+    getListItem: (suggestion: Suggestion, index: number) => HTMLOptionElement;
+    private htmlToNode;
 }

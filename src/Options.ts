@@ -4,7 +4,7 @@ import { Options as FSoptions } from "getaddress-autocomplete-modal";
 export class Options 
 {
     id_prefix?:string = "getAddress-autocomplete-native";
-    delay:number = 200;
+    delay:number = 500;
     minimum_characters:number = 2; 
     clear_list_on_select = true;
     select_on_focus = true;
